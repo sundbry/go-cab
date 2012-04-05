@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>GoCab - Go</title>
+<link rel="stylesheet" href="gocab.css" />
+<link rel="stylesheet" href="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile-1.1.0-rc.1.min.css" />
+<link rel="stylesheet" href="css/jquery.mobile.datebox.css" />
+<script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+<script src="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile-1.1.0-rc.1.min.js"></script>
+<script src="js/jquery.mobile.datebox.js"></script>
+<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDS5FvKukU8JDBpmnQgtXQtA-8RzqdLV8Q&sensor=true"></script>
+<script type="text/javascript" src="gocab.js"></script>
+</head>
+<body>
+<h2>Order Review</h2>
+<form method="post" action="go-ordered.html">
+	<table>
+		<thead><tr><th colspan="2">Travel Details</th></tr></thead>
+		<tbody>
+		<tr><th>Customer Name</th><td>John Doe</td></tr>
+		<tr><th>Phone Number</th><td>(805) 555-1234</td></tr>
+		<tr><th>Riders</th><td>1</td></tr>
+		<tr><th>Pick-Up Address</th><td>1050 Monterey St, San Luis Obispo, CA 93401</td></tr>
+		<tr><th>Pick-Up Time</th><td>5:30 PM, 3/15/2012</td></tr>
+		<tr><th>Destination</th><td>1 Grand Ave, San Luis Obispo, CA 93405</td></tr>
+		<tr><th>Message</th><td>Please send a cab over.</td></tr>
+		</tbody>
+	</table>
+	<table>
+		<thead><tr><th colspan="2">Company Information</th></tr></thead>
+		<tbody>
+		<tr><th>Company</th><td>Beach Cities Cab Co</td></tr>
+		<tr><th>Phone Number</th><td>(805) 543-1234</td></tr>
+		<tr><th>Estimated Cost</th><td>$9.35</td></tr>
+		</tbody>
+	</table>
+	<button type="submit">Submit Order</button>
+</form>
+</body>
+</html>
+

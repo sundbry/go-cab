@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>GoCab - Go</title>
+<link rel="stylesheet" href="css/gocab.css" />
+<link rel="stylesheet" href="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile-1.1.0-rc.1.min.css" />
+<link rel="stylesheet" href="css/jquery.mobile.datebox.css" />
+<script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+<script src="http://code.jquery.com/mobile/1.1.0-rc.1/jquery.mobile-1.1.0-rc.1.min.js"></script>
+<script src="js/jquery.mobile.datebox.js"></script>
+<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDS5FvKukU8JDBpmnQgtXQtA-8RzqdLV8Q&sensor=true"></script>
+<script type="text/javascript" src="js/gocab.js"></script>
+</head>
+<body>
+<form id="go-1" method="post" action="go-2.html">
+<div data-role="collapsible-set">
+	<div data-role="collapsible" data-collapsed="false">
+		<h3>Destination</h3>
+		<input type="search" name="go-search-dest" id="go-search-dest" value="1 Grand Ave, San Luis Obispo, CA" />
+		<div class="map-canvas" id="map-canvas-dest" style="width: 200px; height: 200px;"></div>
+	</div>
+	<div data-role="collapsible" data-collapsed="true">
+		<h3>Pick-up</h2>
+		<input type="search" name="go-search-pickup" id="go-search-pickup" value="1050 Monterey St, San Luis Obispo, CA" />
+		<div class="map-canvas" id="map-canvas-pickup" style="width: 200px; height: 200px;"></div>
+		<hr />
+		<label for="go-time-pickup">Time:</label>
+		<input type="date" name="go-time-pickup" id="go-time-pickup" data-role="datebox" data-options="{'mode': 'timebox', 'timeFormatOverride': 12}" value="5:30 PM"/>
+		<label for="go-date-pickup">Date:</label>
+		<input type="date" name="go-date-pickup" id="go-date-pickup" data-role="datebox" data-options="{'mode': 'datebox'}" value="2012-03-15" />
+		<label for="go-num-riders">Riders:</label>
+		<select name="go-num-riders" id="go-num-riders">
+			<option value="1">1</option>
+			<option value="2">2</option>
+			<option value="3">3</option>
+			<option value="4">4</option>
+			<option value="5">5</option>
+			<option value="6">6</option>
+			<option value="7">7</option>
+			<option value="8">8</option>
+			<option value="9">9</option>
+			<option value="10+">10+</option>
+		</select>
+	</div>
+	<div data-role="collapsible" data-collapsed="true">
+		<h3>Messaging</h3>
+		<fieldset data-role="controlgroup" data-type="horizontal">
+			<input type="radio" name="go-message-mode" id="go-message-mode-text" value="text" checked="checked" />
+			<label for="go-message-mode-text">Text</label>
+			<input type="radio" name="go-message-mode" id="go-message-mode-call" value="call" />
+			<label for="go-message-mode-call">Call</label>
+			<div data-role="fieldcontain">
+				<textarea name="go-message-text" id="go-message-text" placeholder="Please send a cab now!"></textarea>
+			</div>
+		</fieldset>
+	</div>
+</div>
+<button type="submit">Find a driver!</button>
+</form>
+<script type="text/javascript">
+gocab.go1.init();
+</script>
+</body>
+</html>
