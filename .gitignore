@@ -1,0 +1,6 @@
+.bash*
+.ssh
+.viminfo
+*.swp
+*.swo
+*.pyc
