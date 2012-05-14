@@ -9,8 +9,15 @@ body {
 .map-canvas {
 	margin: 10px;
 }
-a button {
+a.button {
 	text-decoration: none;
 }
 body.index .main-button {
+}
+
+form label.error {
+	color: #ff0000;
+}
+form input.error {
+	border-color: #ff0000;
 }

@@ -1,11 +1,9 @@
 <?
 require('inc/header.php');
 ?>
-<body class="index">
-<div class="ui-grid-a main-button">
-	<div class="ui-block-a">
-		<a href="go.html"><button type="submit" value="order">Order a Cab</button></a>
-	</div>
+<div data-role="page" class="index">
+<div class="main-button">
+	<a class="button" href="go.php"><button type="submit" value="order">Order a Cab</button></a>
 </div>
 <div class="ui-grid-a">
 	<div class="ui-block-a">
@@ -14,6 +12,7 @@ require('inc/header.php');
 	<div class="ui-block-b">
 		<button type="submit" value="profile">Profile</button>
 	</div>
+</div>
 </div>
 <?
 require('inc/footer.php');
