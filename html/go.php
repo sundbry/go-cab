@@ -13,11 +13,13 @@ function preset($field) {
 <div data-role="collapsible-set">
 	<div data-role="collapsible" data-collapsed="false">
 		<h3>Destination</h3>
+		<input type="hidden" name="go-search-dest-gc" id="go-search-dest-gc" value="" />
 		<input type="search" name="go-search-dest" id="go-search-dest" value="1 Grand Ave, San Luis Obispo, CA" />
 		<div class="map-canvas" id="map-canvas-dest" style="width: 200px; height: 200px;"></div>
 	</div>
 	<div data-role="collapsible" data-collapsed="true">
 		<h3>Pick-up</h3>
+		<input type="hidden" name="go-search-pickup-gc" id="go-search-pickup-gc" value="" />
 		<input type="search" name="go-search-pickup" id="go-search-pickup" value="1050 Monterey St, San Luis Obispo, CA" />
 		<div class="map-canvas" id="map-canvas-pickup" style="width: 200px; height: 200px;"></div>
 		<div data-role="fieldcontain">
