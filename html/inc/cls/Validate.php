@@ -4,12 +4,26 @@ class Validate {
 
 	private $rules = array(), $errors = array(), $values = null;
 
-	public function __construct(array $rules) {
+	public function __construct($rules = array()) {
 		$this->rules = $rules;
+	}
+
+	public function addRules(array $rules) {
+		$this->rules = array_merge($this->rules, $rules);
 	}
 
 	public function errors() {
 		return $this->errors;
+	}
+
+	public function errorsList() {
+		$list = array();
+		foreach($this->errors as $errs) {
+			foreach($errs as $err) {
+				array_push($list, $err);
+			}
+		}
+		return $list;
 	}
 
 	public function firstErrorMessage() {
@@ -17,6 +31,10 @@ class Validate {
 			return reset(reset($this->errors));
 		}
 		return false;
+	}
+
+	public function hasError() {
+		return !empty($this->errors);
 	}
 
 	public function run($values) {

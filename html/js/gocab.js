@@ -4,16 +4,45 @@
 
 var gocab = {
 
-	defaultZoom: 17,
+	defaultZoom: 15,
 	
 	error: function(msg) {
 		alert(msg);
 	},
 
+	location: {
+		isSpecificLocation: function(place) {
+			return place.geometry != undefined && 
+				// known address
+				(place.geometry.location_type == 'ROOFTOP'
+				// known establishment
+				|| place.types.indexOf('establishment') >= 0
+				// precise address
+				|| (place.types.indexOf('street_address') >= 0 && place.geometry.bounds == undefined));
+		},
+
+		makeFullAddress: function(place) {
+			return place.formatted_address;
+			/*
+			var address = '';
+			if(place.address_components) {
+				address = [(place.address_components[0] &&
+					place.address_components[0].short_name || ''),
+					(place.address_components[1] &&
+					place.address_components[1].short_name || ''),
+					(place.address_components[2] &&
+					place.address_components[2].short_name || '')
+					].join(' ');
+			}
+			return address;
+			*/
+		}
+	},
+
 	go1: {
 		
 		placeError: {},
-
+		kCurrentPosTimeout: 10000,
 
 		init: function() {
 			gocab.go1.initMaps();
@@ -24,21 +53,30 @@ var gocab = {
 		initMaps: function() {
 			var defaultOptions = {
 				//center: new google.maps.LatLng(-34.397, 150.644),
-				zoom: 15,
+				zoom: gocab.defaultZoom,
 				mapTypeId: google.maps.MapTypeId.ROADMAP
 			};
 			var mapDest = new google.maps.Map(document.getElementById("map-canvas-dest"), defaultOptions);
 			var mapPickup = new google.maps.Map(document.getElementById("map-canvas-pickup"), defaultOptions);
+			mapDest.posMarker = null;
+			mapPickup.posMarker = null;
 			var inputDest = $("#go-search-dest");
 			var inputPickup = $("#go-search-pickup");
 
-			var placeCB = function(map, place, inputGC) {
+			var placeCB = function(map, place, inputGC, requireSpecificLocation) {
+				var error = null;
 				if(place != null) {
+					if(inputGC.attr('rel') == 'use-current-gc') {
+						return;
+					}
+					console.log(place);
 					if(place.geometry == undefined) {
-						gocab.go1.placeError[inputGC.attr('name')] = 'Unknown location: '+place.name;
+						error = 'Unknown location: '+place.name;
 					}
 					else {
-						gocab.go1.placeError[inputGC.attr('name')] = null;
+						if(requireSpecificLocation && !gocab.location.isSpecificLocation(place)) {
+							error = 'Please choose a more specific location: '+gocab.location.makeFullAddress(place);
+						}
 
 						if(place.geometry.viewport) {
 							map.fitBounds(place.geometry.viewport);
@@ -47,68 +85,94 @@ var gocab = {
 							map.setCenter(place.geometry.location);
 							map.setZoom(gocab.defaultZoom);
 						}
-						var marker = new google.maps.Marker({
-							'map': map,
-							'position': place.geometry.location
-						});
 
-						var infowindow = new google.maps.InfoWindow();
-						var marker = new google.maps.Marker({
-							map: map
-						});
-						/*
 						var image = new google.maps.MarkerImage(
 							place.icon,
 							new google.maps.Size(71, 71),
 							new google.maps.Point(0, 0),
 							new google.maps.Point(17, 34),
 							new google.maps.Size(35, 35));
-							marker.setIcon(image);
-							marker.setPosition(place.geometry.location);
-						*/
 
-						var address = '';
-						if (place.address_components) {
-							address = [
-								(place.address_components[0] &&
-								place.address_components[0].short_name || ''),
-								(place.address_components[1] &&
-								place.address_components[1].short_name || ''),
-								(place.address_components[2] &&
-								place.address_components[2].short_name || '')
-							].join(' ');
+						if(map.posMarker != null) {
+							map.posMarker.setMap(null);
 						}
 
-						infowindow.close();
-						infowindow.setContent('<div><strong>' + place.name + '</strong><br />' + address);
-						infowindow.open(map, marker);
+						map.posMarker = new google.maps.Marker({
+							'map': map,
+							'position': place.geometry.location,
+							'icon': image
+						});
 					}
 				}
-				inputGC.val(place == null ? 'loading' : (place.geometry == null ? 'error' : place.geometry.location));
+				gocab.go1.placeError[inputGC.attr('name')] = error;
+				inputGC.val(place == null ? 'loading' : (error == null ? place.geometry.location : 'error'));
 			} 
 
 			var destCB = function(map, place) {
-				return placeCB(map, place, $("#go-search-dest-gc"));
+				return placeCB(map, place, $("#go-search-dest-gc"), false);
 			}
 			var pickupCB = function(map, place) {
-				return placeCB(map, place, $("#go-search-pickup-gc"));
+				return placeCB(map, place, $("#go-search-pickup-gc"), true);
 			} 
 
-			gocab.go1.loadAddress(mapDest, inputDest.val(), destCB);
-			gocab.go1.loadAddress(mapPickup, inputPickup.val(), pickupCB);
 			gocab.go1.initMapsAutoComplete(mapDest, inputDest, destCB);
 			gocab.go1.initMapsAutoComplete(mapPickup, inputPickup, pickupCB);
+
+			inputPickup.attr('placeholder', 'Loading...');
+
+			var currentPosError = function() {
+				inputPickup.attr('placeholder', '');
+				gocab.error('Unable to determine your current location.');
+			};
+
+			navigator.geolocation.getCurrentPosition(function(position) {
+					// success
+					console.log('done');
+					var latLng = new google.maps.LatLng(position.coords.latitude,
+						position.coords.longitude);
+					var geocoder = new google.maps.Geocoder();
+					geocoder.geocode(
+						{'latLng': latLng},
+						function(results, statusCode) {
+							if(statusCode == google.maps.GeocoderStatus.OK) {
+								inputPickup.attr('placeholder', '');
+								var place = results[0];
+
+								mapDest.setCenter(place.geometry.location);
+								mapDest.setZoom(gocab.defaultZoom);
+
+								inputPickup.val(gocab.location.makeFullAddress(place));
+								pickupCB(mapPickup, place);
+
+								var inputPickupGC = $("#go-search-pickup-gc");
+								inputPickupGC.attr('rel', 'use-current-gc');
+								inputPickup.change(function() {
+									inputPickupGC.attr('rel', '');
+								});
+							}
+							else {
+								currentPosError();
+							}
+						});
+				}, currentPosError, {enableHighAccuracy: true, timeout: gocab.go1.kCurrentPosTimeout});
 		},
 
 		initMapsAutoComplete: function(map, input, placeCallback) {
 			// code adapted from https://google-developers.appspot.com/maps/documentation/javascript/examples/places-autocomplete
-			input = input.get(0); // get native DOM object
-			var autocomplete = new google.maps.places.Autocomplete(input);
-			autocomplete.bindTo('bounds', map);
+			var domInput = input.get(0); // get native DOM object
+
+			input.keypress(function(evt) {
+				if(evt.which == 13) {
+					evt.preventDefault();
+				}
+			});
+
+			var autocomplete = new google.maps.places.Autocomplete(domInput, { });
+			autocomplete.bindTo('bounds', map); // bias results towards the current map area
 
 			google.maps.event.addListener(autocomplete, 'place_changed', function() {
+				console.log('place_changed');
 				var place = autocomplete.getPlace();
-
 				placeCallback(map, place);
 			});
 		},
@@ -118,12 +182,12 @@ var gocab = {
 			var geocoder = new google.maps.Geocoder();
 			geocoder.geocode(
 				{'address': address},
-				function(results, status) {
-					if (status == google.maps.GeocoderStatus.OK) {
+				function(results, statusCode) {
+					if (statusCode == google.maps.GeocoderStatus.OK) {
 						placeCallback(map, results[0]);
 					}
 					else {
-						gocab.error("Geocode was not successful for the following reason: " + status);
+						gocab.error("Geocode was not successful for the following reason: " + statusCode);
 					}
 				}
 			);
@@ -140,6 +204,11 @@ var gocab = {
 			maxDate.setHours(23);
 			maxDate.setMinutes(59);
 
+			var next5Min = 5 - (now.getMinutes() % 5);
+			if(next5Min > 0) {
+				now = new Date(now.getTime() + (60000 * next5Min));
+			}
+
 			$("#go-datetime-pickup").scroller($.extend({
 					preset: 'datetime',
 					'minDate': minDate,
@@ -154,6 +223,7 @@ var gocab = {
 		initFormSubmit: function() {
 			$("#go-1").bind('submit', function() {
 				$.mobile.showPageLoadingMsg();
+				var errorSection = null;
 				var inputDestGC = $("#go-search-dest-gc");
 				var inputPickupGC = $("#go-search-pickup-gc");
 
@@ -165,7 +235,13 @@ var gocab = {
 					var error = gocab.go1.placeError[inputDestGC.attr('name')];
 					if(error == null) {
 						error = gocab.go1.placeError[inputPickupGC.attr('name')];
+						errorSection = inputPickupGC;
 					}
+					else {
+						errorSection = inputDestGC;
+					}
+					errorSection = errorSection.closest('div[data-role=collapsible]');
+					errorSection.trigger('expand');
 					gocab.error(error);
 					return false;
 				}
@@ -181,7 +257,10 @@ var gocab = {
 						*/
 						$.mobile.changePage("go-2.php", {
 							type: 'post',
-							data: re.continuePost});
+							data: {
+								'continue': re.continuePost
+							}
+						});
 						
 					}	
 					else {
@@ -194,17 +273,24 @@ var gocab = {
 						*/
 						$.mobile.hidePageLoadingMsg();
 
-						var firstSection = null;
+						$("label.error, input.error").each(function(idx, node) {
+							$(node).removeClass('error');	
+						});
+
 						$.each(re.errorLabels, function(idx, name) {
 							var lbl = $('label[for='+name+']');
 							var input = $('#'+name);
-							lbl.addClass('error');
-							input.addClass('error');
-							firstSection = lbl.closest('div[data-role=collapsible]');
+							if(lbl.length > 0)
+								lbl.addClass('error');
+							if(input.length > 0) 
+								input.addClass('error');
+							if(errorSection == null) {
+								errorSection = (lbl.length > 0 ? lbl : input).closest('div[data-role=collapsible]');
+							}
 						});
 
-						if(firstSection != null) {
-							firstSection.trigger('expand');
+						if(errorSection != null) {
+							$(errorSection).trigger('expand');
 						}
 
 						if(re.errorMessage != '') {
@@ -221,9 +307,16 @@ var gocab = {
 		}
 
 
-	} // go1
+	}, // go1
+
+	go2: {
+		init: function() {
+
+		}
+	}
 
 }
 
 $('#go-1').live('pageinit', gocab.go1.init);
+$('#go-2').live('pageinit', gocab.go2.init);
 

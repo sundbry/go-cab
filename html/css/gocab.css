@@ -21,3 +21,11 @@ form label.error {
 form input.error {
 	border-color: #ff0000;
 }
+
+/* google maps autocomplete */
+.pac-container {
+
+}
+.pac-item {
+	padding: 8px 4px;
+}

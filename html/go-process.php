@@ -16,17 +16,22 @@ $v_geocode = function($val) {
 	return !empty($val) && $val != 'loading' && $val != 'error' ;
 };
 
+$v_futuretime = function($val) {
+	$t = strtotime($val);
+	return ($t + 60) >= time();
+};
+
 $validate = new Validate(array(
-		'go-search-dest' => VRule::required('Choose your destination address.'),	
-		'go-search-dest-gc' => new VRule($v_geocode, 'Unknown destination address geocode.'),	
-		'go-search-pickup' => VRule::required('Choose your pick-up location.'),
-		'go-search-pickup-gc' => new VRule($v_geocode, 'Unknown pickup address geocode.'),	 
-		'go-datetime-pickup' => array(VRule::required('Choose your pick-up time.'),
-			VRule::futureDatetime('Please schedule a pick-up time now or in the future.')),
-		'go-message-mode' => VRule::required('Message mode required.'),
-		'go-callback-number'=> VRule::phone('Please provide your callback number.'),
-		'asdf' => VRule::required('lol')
-	));
+	'go-search-dest' => VRule::required('Choose your destination address.'),	
+	'go-search-dest-gc' => new VRule($v_geocode, 'Unknown destination address.'),	
+	'go-search-pickup' => VRule::required('Choose your pick-up location.'),
+	'go-search-pickup-gc' => new VRule($v_geocode, 'Unknown pickup address.'),	 
+	'go-datetime-pickup' => array(VRule::required('Choose your pick-up time.'),
+		new VRule($v_futuretime, 'Please schedule a pick-up time now or in the future.')),
+	#'go-message-mode' => VRule::required('Message mode required.'),
+	'go-callback-number'=> array(VRule::required('Please provide your callback number.'),
+		VRule::phone('Please provide your full callback number with your area code.'))
+));
 
 if($validate->run($_POST)) {;
 	$csr = CabServiceRequest::create($_POST);
