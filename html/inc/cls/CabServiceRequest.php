@@ -24,7 +24,7 @@ class CabServiceRequest {
 				$this->pickupPos = new LatLng($this->data['pickup_latitude'], $this->data['pickup_longitude']);
 			if($this->destPos == null)
 				$this->destPos = new LatLng($this->data['dest_latitude'], $this->data['dest_longitude']);
-			$this->dist = Geometry::distance($this->pickupPos, $this->destPos);
+			$this->dist = Geometry::earthDistance($this->pickupPos, $this->destPos);
 		}
 		return $this->dist;
 	}
@@ -41,7 +41,7 @@ class CabServiceRequest {
 
 		foreach(CabServiceStation::activeList() as $station) {
 			$servicePos = $station->latLng();
-			$sdist = Geometry::distance($this->pickupPos, $servicePos);
+			$sdist = Geometry::earthDistance($this->pickupPos, $servicePos);
 			if($sdist <= $station->range()) {
 				array_push($offers, new CabServiceOffer($station, $this->distance()));
 			}
@@ -61,15 +61,15 @@ class CabServiceRequest {
 		*/
 
 		$pickupTime = $post['go-datetime-pickup'];
-		$destGC = Geocode::parse($post['go-search-dest-gc'])->point;
-		$pickupGC = Geocode::parse($post['go-search-pickup-gc'])->point;
+		$dest = LatLng::parseGeocode($post['go-search-dest-gc']);
+		$pickup = LatLng::parseGeocode($post['go-search-pickup-gc']);
 		$q = sprintf("INSERT INTO gc_service_request VALUES(NULL, '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%s', NOW());",
 				GCConfig::$db->real_escape_string($post['go-search-dest']), 
-				GCConfig::$db->real_escape_string($destGC[0]), 
-				GCConfig::$db->real_escape_string($destGC[1]), 
+				GCConfig::$db->real_escape_string($dest->lat), 
+				GCConfig::$db->real_escape_string($dest->lng), 
 				GCConfig::$db->real_escape_string($post['go-search-pickup']),
-				GCConfig::$db->real_escape_string($pickupGC[0]), 
-				GCConfig::$db->real_escape_string($pickupGC[1]), 
+				GCConfig::$db->real_escape_string($pickup->lat), 
+				GCConfig::$db->real_escape_string($pickup->lng), 
 				GCConfig::$db->real_escape_string($pickupTime),
 				GCConfig::$db->real_escape_string($post['go-message-mode']),
 				GCConfig::$db->real_escape_string(preg_replace('/D/', '', $post['go-callback-number'])),

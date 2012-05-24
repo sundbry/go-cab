@@ -9,7 +9,7 @@ if(isset($_GET['continue'])) {
 	$_POST['continue'] = $_GET['continue'];
 }
 
-if($valid->run($_POST) && $csr = CabServiceRequest::loadCSR($_POST['continue'])) {
+if($valid->run($_POST) && ($csr = CabServiceRequest::loadCSR($_POST['continue']))) {
 	$offers = $csr->findServiceOfferings();
 
 	echo '<div data-role="page" id="go-2">', "\n";
@@ -17,12 +17,20 @@ if($valid->run($_POST) && $csr = CabServiceRequest::loadCSR($_POST['continue']))
 	echo '<ul data-role="listview">', "\n";
 
 	foreach($offers as $offer) {
-		echo '<li><a href="go-3.html">
-			<p class="ul-li-aside">Cost Estimate: <strong>$', $offer->estPrice(), '</strong> ('.$offer->distance(), ' mi)</p>
-			<h3>', htmlentities($offer->station->name()), '</h3>
-			<p><strong><a href="tel:+', $offer->station->phone(), '">', $offer->station->fancyPhone(), '</a></strong></p>
-		</a></li>';
-		
+		$rating = $offer->station->rating();
+
+		# absolute positioning used b/c ul-li-aside not working as advertised
+		echo '<li style="position: relative;"><a href="go-3.php?csr=', $csr->__toString(), '&css=', $offer->station->__toString(), '" data-rel="dialog">
+			<p class="ul-li-aside" style="position: absolute; right: 10px;"><strong><span class="phone-number" href="tel:+', $offer->station->phone(), '">', $offer->station->fancyPhone(), '</span></strong></p>
+			<p>Cost Estimate: <strong>$', $offer->estPrice(), '</strong> ('.$offer->roundDistance(), ' mi)</p>
+			<h3>', htmlentities($offer->station->name()), '</h3>';
+
+			echo '<p>';
+			for($star = 0; $star < 5; $star++) {
+				echo '<div class="show-star show-star-', ($rating >= $star ? 'full' : 'empty'), '"></div>';
+			}
+			echo '</p>';
+		echo '</a></li>';
 	}
 
 	echo "</ul>\n";

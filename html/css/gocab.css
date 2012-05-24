@@ -29,3 +29,24 @@ form input.error {
 .pac-item {
 	padding: 8px 4px;
 }
+
+/* rating stars */
+.show-star {
+	width: 16px;
+	height: 16px;
+	background-image: url('/img/star.gif');
+	float: left;
+}
+
+.show-star-full {
+	background-position: 0 16px;
+}
+
+#go-3 h3 {
+	text-align: center;
+}
+#go-3-abort {
+	margin-top: 1em;
+	text-align: center;
+}
+

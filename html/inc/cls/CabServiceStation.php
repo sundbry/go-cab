@@ -10,6 +10,10 @@ class CabServiceStation {
 		$this->id = $row['id'];
 	}
 
+	function __toString() {
+		return 'css-'.$this->id;
+	}
+
 	function name() {
 		return $this->data['name'];
 	}
@@ -51,6 +55,15 @@ class CabServiceStation {
 		return $this->data['range'];
 	}
 
+	function rating() {
+		return rand(0, 5);
+	}
+
+	/** Return the estimated time for this station's dispatcher to respond, in seconds */
+	function estimatedDispatchResponseTime() {
+		return rand(1, 180);
+	}
+
 	/** Return a list of all stations who have active contracts */
 	public static function activeList() {
 		$q = "SELECT * FROM gc_service_station ORDER BY name ASC;";
@@ -86,6 +99,11 @@ class CabServiceStation {
 			return new CabServiceStation($row);
 		}
 		return null;
+	}
+
+	public static function loadCSS($code) {
+		$id = intval(str_replace('css-', '', $code));
+		return self::load($id);
 	}
 
 }

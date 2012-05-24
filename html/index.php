@@ -13,6 +13,10 @@ require('inc/header.php');
 		<button type="submit" value="profile">Profile</button>
 	</div>
 </div>
+<h5>Testing Shortcuts</h5>
+<ul>
+<li><a href="go-2.php?continue=csr-3">csr 3</a></li>
+</ul>
 </div>
 <?
 require('inc/footer.php');

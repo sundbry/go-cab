@@ -256,7 +256,7 @@ var gocab = {
 						}
 						*/
 						$.mobile.changePage("go-2.php", {
-							type: 'post',
+							type: 'get',
 							data: {
 								'continue': re.continuePost
 							}
@@ -311,7 +311,87 @@ var gocab = {
 
 	go2: {
 		init: function() {
+		}
+	},
 
+	go3: {
+
+		timeStart: 0,
+		waitTimer: null,
+		maxWait: 600, // time out after 10 minutes 
+		orderNumber: null,
+
+		init: function() {
+			gocab.go3.orderNumber = $("#order-number").val();
+			$('.ui-dialog').on('pagehide', gocab.go3.abort);
+			$('#go-3-abort button').click(function() {
+				$('#go-3').dialog('close');
+			});
+			gocab.go3.timeStart = (new Date).getTime();
+			gocab.go3.runTimer();
+			gocab.go3.waitDispatchResponse();
+		},
+
+		abort: function() {
+			if(gocab.go3.waitTimer != null) {
+				window.clearTimeout(gocab.go3.waitTimer);
+			}
+		},
+
+		runTimer: function() {
+			var diff = Math.round(((new Date).getTime() - gocab.go3.timeStart) / 1000);
+
+			gocab.go3.waitTimer = null;
+
+			if(diff > gocab.go3.maxWait) {
+				gocab.error('Gave up after no dispatch response in ' + Math.round(gocab.go3.maxWait / 60) + ' minutes.');
+				gocab.go3.abort();
+				return;
+			}
+
+			var secs = diff % 60;
+			$("#waiting-time").html(Math.floor(diff / 60) + ':' + (secs < 10 ? '0' : '') + secs);
+			gocab.go3.waitTimer = window.setTimeout(gocab.go3.runTimer, 1000);
+		},
+
+		waitDispatchResponse: function() {
+			console.log(gocab.go3.orderNumber);
+			$.ajax({
+				url: 'go-3-wait.php',
+				type: 'POST',
+				data: { 'order': gocab.go3.orderNumber },
+				success: gocab.go3.dispatchResponse,
+				dataType: 'json',
+				timeout: 30000
+			});
+		},
+
+		dispatchResponse: function(re) {
+			switch(re.mode) {
+				case 'accept':
+				case 'reject':
+					$.mobile.changePage("go-4.php", {
+						type: 'get',
+						data: {
+							'order': gocab.go3.orderNumber
+						}
+					});
+					break;
+
+				case 'wait':
+					gocab.go3.waitDispatchResponse();
+					break;
+
+				case 'error':
+					gocab.go3.abort();
+					gocab.error(re.errorMessage);
+					break;
+
+				default:
+					gocab.go3.abort();
+					gocab.error(re);
+					break;
+			}
 		}
 	}
 
@@ -319,4 +399,5 @@ var gocab = {
 
 $('#go-1').live('pageinit', gocab.go1.init);
 $('#go-2').live('pageinit', gocab.go2.init);
+$('#go-3').live('pageinit', gocab.go3.init);
 
