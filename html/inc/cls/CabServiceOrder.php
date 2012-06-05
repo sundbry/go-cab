@@ -25,7 +25,7 @@ class CabServiceOrder {
 	 * @return bool
 	 */
 	function dispatchWaiting() {
-		return false;
+		return rand(0, 16) != 0;
 	}
 
 	public static function create(CabServiceRequest $csr, CabServiceStation $station) {

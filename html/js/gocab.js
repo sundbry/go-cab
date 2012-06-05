@@ -314,6 +314,19 @@ var gocab = {
 		}
 	},
 
+	go3confirm: {
+		init: function() {
+			$('#go-3-confirm.ui-dialog').on('pagehide', gocab.go3confirm.abort);
+			$('#go-3-confirm .go-3-abort button').click(function() {
+				$('#go-3-confirm').dialog('close');
+			});
+		},
+
+		abort: function() {
+		}
+
+	},
+
 	go3: {
 
 		timeStart: 0,
@@ -323,8 +336,8 @@ var gocab = {
 
 		init: function() {
 			gocab.go3.orderNumber = $("#order-number").val();
-			$('.ui-dialog').on('pagehide', gocab.go3.abort);
-			$('#go-3-abort button').click(function() {
+			$('#go-3.ui-dialog').on('pagehide', gocab.go3.abort);
+			$('#go-3 .go-3-abort button').click(function() {
 				$('#go-3').dialog('close');
 			});
 			gocab.go3.timeStart = (new Date).getTime();
@@ -355,7 +368,6 @@ var gocab = {
 		},
 
 		waitDispatchResponse: function() {
-			console.log(gocab.go3.orderNumber);
 			$.ajax({
 				url: 'go-3-wait.php',
 				type: 'POST',
@@ -399,5 +411,6 @@ var gocab = {
 
 $('#go-1').live('pageinit', gocab.go1.init);
 $('#go-2').live('pageinit', gocab.go2.init);
+$('#go-3-confirm').live('pageinit', gocab.go3confirm.init);
 $('#go-3').live('pageinit', gocab.go3.init);
 

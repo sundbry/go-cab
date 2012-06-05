@@ -45,7 +45,7 @@ form input.error {
 #go-3 h3 {
 	text-align: center;
 }
-#go-3-abort {
+#go-3 .go-3-abort {
 	margin-top: 1em;
 	text-align: center;
 }

@@ -29,6 +29,14 @@ class CabServiceRequest {
 		return $this->dist;
 	}
 
+	function pickupAddress() {
+		return $this->data['pickup_address'];
+	}
+
+	function pickupDate($fmt) {
+		return date($fmt, strtotime($this->data['pickup_time']));
+	}
+
 	function roundDistance() {
 		return sprintf("%.2f", $this->distance());
 	}
