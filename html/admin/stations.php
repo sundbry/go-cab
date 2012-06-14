@@ -9,7 +9,7 @@ require('inc/header.php');
 <tr><th>ID</th><th>Name</th><th>Phone</th><th>Website</th><th>City</th><th>State</th><th>Lat</th><th>Long</th></tr>
 <?
 foreach(CabServiceStation::activeList() as $station) {
-	echo '<tr><td>', $station->id, '</td><td>', htmlentities($station->name()), '</td><td>', $station->phone(), '</td><td>', htmlentities($station->website()), '</td><td>', $station->city(), '</td><td>', $station->state(), '</td><td>', $station->latitude(), '</td><td>', $station->longitude(), '</td></tr>';
+	echo '<tr><td>', $station->id, '</td><td>', htmlentities($station->name()), '</td><td>', $station->phoneNumber(), '</td><td>', htmlentities($station->website()), '</td><td>', $station->city(), '</td><td>', $station->state(), '</td><td>', $station->latitude(), '</td><td>', $station->longitude(), '</td></tr>';
 }
 ?>
 </table>

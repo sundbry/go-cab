@@ -30,6 +30,19 @@ form input.error {
 	padding: 8px 4px;
 }
 
+#go-2 li.refused {
+
+}
+#go-2 li span.refused {
+	font-weight: normal;
+	font-style: italic;
+	color: #f06060;
+}
+
+#go-2 em.num-ratings {
+	font-size: 12px;
+}
+
 /* rating stars */
 .show-star {
 	width: 16px;
@@ -50,3 +63,24 @@ form input.error {
 	text-align: center;
 }
 
+#go-4-accept > .pad, #go-5 > .pad {
+	padding: 10px;
+}
+.go-4 dd {
+	font-weight: bold;
+	margin-bottom: 0.5em;
+}
+
+#go-5 .rating-ctnr {
+	zoom: 250%;
+}
+
+.rating-cancel {
+	display: none !important;
+}
+
+#go-5 .go-5-done {
+	text-align: center;
+	clear: both;
+	margin-top: 80px;
+}

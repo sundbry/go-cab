@@ -16,7 +16,7 @@ $validate = new Validate(array(
 if($validate->run($_POST) && ($order = CabServiceOrder::loadOrder($_POST['order']))) {
 	$timeStart = time();
 
-	while($order->dispatchWaiting() && (time() - $timeStart < POLL_TIMEOUT)) {
+	while($order->dispatchWaiting(true) && (time() - $timeStart < POLL_TIMEOUT)) {
 		usleep(LOOP_INTERVAL * 1000);
 	}
 

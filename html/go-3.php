@@ -44,7 +44,7 @@ if($valid->run($_POST)
 					</div>
 				</div>
 				<div class="go-3-abort">
-					<button type="button" value="cancel" data-icon="back">Cancel</button>
+					<button type="button" value="cancel" data-icon="back" data-theme="a">Cancel</button>
 				</div>
 			</div>
 		</div>';
@@ -60,10 +60,10 @@ if($valid->run($_POST)
 				<h4>Pickup Time: <em>', $csr->pickupDate('F j \a\t h:i a'), '</em></h4>
 				<div class="ui-grid-a">
 					<div class="ui-block-a go-3-confirm">
-						<a href="go-3.php?csr=', xssSafe($_POST['csr']), '&css=', xssSafe($_POST['css']), '&confirm=1" data-role="button" data-theme="b" data-icon="check" data-rel="dialog">Confirm</a>
+						<a href="go-3.php?csr=', xssSafe($_POST['csr']), '&css=', xssSafe($_POST['css']), '&confirm=1" data-role="button" data-theme="e" data-icon="check" data-rel="dialog">Confirm</a>
 					</div>
 					<div class="ui-block-b go-3-abort">
-						<button type="button" value="cancel" data-icon="back">Cancel</button>
+						<button type="button" value="cancel" data-icon="back" data-theme="a">Cancel</button>
 					</div>
 				</div>
 			</div>

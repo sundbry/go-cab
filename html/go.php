@@ -52,7 +52,7 @@ function preset($field) {
 		</fieldset>
 	</div>
 </div>
-<button type="submit" data-theme="b" data-icon="forward">Find a cab!</button>
+<button type="submit" data-theme="e" data-icon="forward">Find a cab!</button>
 </form>
 <?
 require('inc/footer.php');

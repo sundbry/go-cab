@@ -5,6 +5,8 @@
 var gocab = {
 
 	defaultZoom: 15,
+	googleMapsKey: '',
+	googleMapsServerKey: '',
 	
 	error: function(msg) {
 		alert(msg);
@@ -258,7 +260,7 @@ var gocab = {
 						$.mobile.changePage("go-2.php", {
 							type: 'get',
 							data: {
-								'continue': re.continuePost
+								'csr': re.continuePost
 							}
 						});
 						
@@ -311,6 +313,39 @@ var gocab = {
 
 	go2: {
 		init: function() {
+			gocab.go2.otherProvidersSearch();
+		},
+
+		otherProvidersSearch: function() {
+			var radiusM = 16100; // 10 mi in meters
+			var latLng = $("#pickup-lat").val() + ',' + $("#pickup-lng").val();
+			var url = "proxy-googlemaps.php?req="+encodeURIComponent("/maps/api/place/search/json?key="+gocab.googleMapsServerKey+'&location='+latLng+'&radius='+radiusM+"&sensor=false&keyword=taxi");
+			$.post(url, {}, function(re) {
+				re = eval('('+re+')');
+				if(!re.results) {
+					return;
+				}
+				var list = $("#service-list");
+				for(var i = 0; i < re.results.length; i++) {
+					gocab.go2.appendOtherProvider(list, re.results[i]);
+				}
+				list.listview('refresh');
+			});
+		},
+
+		appendOtherProvider: function(list, result) {
+			list.append('<li><a href="javascript:gocab.go2.showOtherDetails(\''+result.reference+'\');"><h3>'+result.name+'</h3><p>'+result.vicinity+'</p></a></li>');
+		},
+
+		showOtherDetails: function(reference) {
+			var url = "proxy-googlemaps.php?req="+encodeURIComponent("/maps/api/place/details/json?reference="+reference+"&sensor=false&key="+gocab.googleMapsServerKey);
+			$.mobile.showPageLoadingMsg();
+			$.post(url, {}, function(re) {
+				$.mobile.hidePageLoadingMsg();
+				re = eval('('+re+')');
+				re = re.result;
+				window.location = "tel: +"+re.international_phone_number.replace(/\s/, '');
+			});
 		}
 	},
 
@@ -333,6 +368,7 @@ var gocab = {
 		waitTimer: null,
 		maxWait: 600, // time out after 10 minutes 
 		orderNumber: null,
+		doAbort: true,
 
 		init: function() {
 			gocab.go3.orderNumber = $("#order-number").val();
@@ -343,11 +379,15 @@ var gocab = {
 			gocab.go3.timeStart = (new Date).getTime();
 			gocab.go3.runTimer();
 			gocab.go3.waitDispatchResponse();
+			gocab.go3.doAbort = true;
 		},
 
 		abort: function() {
 			if(gocab.go3.waitTimer != null) {
 				window.clearTimeout(gocab.go3.waitTimer);
+			}
+			if(gocab.go3.doAbort) {
+				$.post("abort.php", { order: gocab.go3.orderNumber }, function(re) { });
 			}
 		},
 
@@ -379,11 +419,22 @@ var gocab = {
 		},
 
 		dispatchResponse: function(re) {
+			gocab.go3.doAbort = false;
 			switch(re.mode) {
 				case 'accept':
-				case 'reject':
 					$.mobile.changePage("go-4.php", {
 						type: 'get',
+						data: {
+							'order': gocab.go3.orderNumber
+						}
+					});
+					break;
+
+				case 'reject':
+					$('#go-3').dialog('close');
+					$.mobile.changePage("go-4.php", {
+						type: 'get',
+						role: 'dialog',
 						data: {
 							'order': gocab.go3.orderNumber
 						}
@@ -405,6 +456,32 @@ var gocab = {
 					break;
 			}
 		}
+	},
+
+	go4accept: {
+		init: function() {
+			$('#go-4-accept .go-4-abort a').click(function() {
+				$.post("abort.php", { order: $("#order-number").val() }, function(re) {
+					$.mobile.changePage("go-2.php", {
+						type: 'get',
+						data: {
+							'csr': $("#csr-hash").val()
+						}
+					});
+				});
+			});
+		}
+	},
+
+	go4reject: {
+		init: function() {}
+	},
+
+	go5: {
+		init: function() {
+			$('input[type=radio].star').rating({
+			});
+		}
 	}
 
 }
@@ -413,4 +490,7 @@ $('#go-1').live('pageinit', gocab.go1.init);
 $('#go-2').live('pageinit', gocab.go2.init);
 $('#go-3-confirm').live('pageinit', gocab.go3confirm.init);
 $('#go-3').live('pageinit', gocab.go3.init);
+$('#go-4-accept').live('pageinit', gocab.go4accept.init);
+$('#go-4-reject').live('pageinit', gocab.go4reject.init);
+$('#go-5').live('pageinit', gocab.go5.init);
 

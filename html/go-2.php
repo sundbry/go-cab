@@ -3,35 +3,41 @@ require('inc/init.php');
 require('inc/header.php');
 
 $valid = new Validate(array(
-	'continue' => VRule::required('Missing service request')));
+	'csr' => VRule::required('Missing service request')));
 
-if(isset($_GET['continue'])) {
-	$_POST['continue'] = $_GET['continue'];
+if(isset($_GET['csr'])) {
+	$_POST['csr'] = $_GET['csr'];
 }
 
-if($valid->run($_POST) && ($csr = CabServiceRequest::loadCSR($_POST['continue']))) {
+if($valid->run($_POST) && ($csr = CabServiceRequest::loadCSR($_POST['csr']))) {
 	$offers = $csr->findServiceOfferings();
 
+	$pickupLoc = $csr->pickupLocation();
+
 	echo '<div data-role="page" id="go-2">', "\n";
-	echo '<h4>Trip distance: ', $csr->roundDistance(), " mi</h4>\n";
-	echo '<ul data-role="listview">', "\n";
+	echo '<input type="hidden" name="pickup-lat" id="pickup-lat" value="', rtrim($pickupLoc->lat, '0'), '" />';
+	echo '<input type="hidden" name="pickup-lng" id="pickup-lng" value="', rtrim($pickupLoc->lng, '0'), '" />';
+	echo '<ul data-role="listview" data-divider-theme="e" id="service-list">', "\n";
+	echo '<li data-role="list-divider"><h2>Go-Cab Taxi Services</h2></li>', "\n";
+
 
 	foreach($offers as $offer) {
 		$rating = $offer->station->rating();
 
 		# absolute positioning used b/c ul-li-aside not working as advertised
-		echo '<li style="position: relative;"><a href="go-3.php?csr=', $csr->__toString(), '&css=', $offer->station->__toString(), '" data-rel="dialog">
-			<p class="ul-li-aside" style="position: absolute; right: 10px;"><strong><span class="phone-number" href="tel:+', $offer->station->phone(), '">', $offer->station->fancyPhone(), '</span></strong></p>
+		echo '<li style="position: relative;" ', ($offer->hasRefused() ? 'class="refused" data-theme="a"' : 'data-theme="c"'), '><a href="go-3.php?csr=', $csr->__toString(), '&css=', $offer->station->__toString(), '" data-rel="dialog">
+			<p class="ul-li-aside" style="position: absolute; right: 10px;"><strong><span class="phone-number" href="tel:+', $offer->station->phoneNumberDigits(), '">', $offer->station->phoneNumber(), '</span></strong></p>
 			<p>Cost Estimate: <strong>$', $offer->estPrice(), '</strong> ('.$offer->roundDistance(), ' mi)</p>
-			<h3>', htmlentities($offer->station->name()), '</h3>';
+			<h3>', htmlentities($offer->station->name()), ($offer->hasRefused() ? ' <span class="refused">(refused service)</span>' : ''), '</h3>';
 
-			echo '<p>';
-			for($star = 0; $star < 5; $star++) {
+			for($star = 1; $star <= CabServiceStation::MAX_RATING; $star++) {
 				echo '<div class="show-star show-star-', ($rating >= $star ? 'full' : 'empty'), '"></div>';
 			}
-			echo '</p>';
+			echo '&nbsp;&nbsp;<em class="num-ratings">(', $offer->station->numRatings(), ' rating', ($offer->station->numRatings() == 1 ? '' : 's'), ')</em>';
 		echo '</a></li>';
 	}
+
+	echo '<li data-role="list-divider"><h2>Other Taxi Services</h2></li>', "\n";
 
 	echo "</ul>\n";
 
