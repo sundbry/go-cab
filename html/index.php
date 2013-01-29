@@ -16,11 +16,11 @@ require('inc/header.php');
 	</div>
 </div>
 */ ?>
-<h5>Testing Shortcuts</h5>
+<!--<h5>Testing Shortcuts</h5>
 <ul>
 <li><a href="go-2.php?csr=csr-3">csr 3</a></li>
 <li><a href="go-4.php?order=order-79">order 79</a></li>
-</ul>
+</ul>-->
 </div>
 <?
 require('inc/footer.php');

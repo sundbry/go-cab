@@ -1,4 +1,5 @@
 <?
+require('inc/init.php');
 require('inc/header.php');
 
 function preset($field) {
